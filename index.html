@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Soporte Técnico</title>
+  <!-- Google Fonts: Montserrat -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;400&display=swap" rel="stylesheet">
+  <!-- Dialogflow Messenger CSS -->
+  <link rel="stylesheet" href="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/themes/df-messenger-default.css">
+  <style>
+    body {
+      min-height: 100vh;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Montserrat', Arial, sans-serif;
+      color: #fff;
+      background: linear-gradient(120deg, #1e1b2c 0%, #2b1956 50%, #4c2996 100%);
+      /* Fondo Galaxia con overlay */
+      background-image:
+        url('https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=1600&q=80'),
+        radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+      background-size: cover;
+      background-position: center;
+      background-blend-mode: overlay;
+      position: relative;
+      overflow-x: hidden;
+      transition: background 1s;
+      animation: bgmove 20s linear infinite alternate;
+    }
+
+    @keyframes bgmove {
+      0% {background-position: center top;}
+      100% {background-position: center 40%;}
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 80vh;
+      z-index: 1;
+      position: relative;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 3.5rem;
+      margin-bottom: 0.2em;
+      letter-spacing: 2px;
+      font-weight: 700;
+      background: linear-gradient(90deg, #5eead4 10%, #8b5cf6 80%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    p {
+      font-size: 1.5rem;
+      font-weight: 400;
+      margin-bottom: 2em;
+      color: #f8fafc;
+      text-shadow: 0 2px 10px rgba(10,0,50,0.18);
+    }
+
+    /* Efecto estrellas */
+    .stars {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    df-messenger {
+      z-index: 9999;
+      position: fixed;
+      --df-messenger-font-color: #000;
+      --df-messenger-font-family: 'Montserrat', Arial, sans-serif;
+      --df-messenger-chat-background: #231852e8;
+      --df-messenger-message-user-background: #5eead4;
+      --df-messenger-message-bot-background: #fff;
+      --df-messenger-input-box-background: #f3f6fc;
+      --df-messenger-input-font-color: #000;
+      --df-messenger-send-icon: #8b5cf6;
+      --df-messenger-chat-border-radius: 1.2rem;
+      bottom: 32px;
+      right: 32px;
+    }
+    /* Responsive */
+    @media (max-width: 600px) {
+      h1 {font-size: 2.1rem;}
+      p {font-size: 1.1rem;}
+      .container {min-height: 60vh;}
+      df-messenger {bottom: 8px; right: 8px;}
+    }
+  </style>
+</head>
+<body>
+  <!-- Fondo de estrellas animadas -->
+  <canvas class="stars"></canvas>
+  <div class="container">
+    <h1>Soporte Técnico</h1>
+    <p>¡Bienvenido! Aquí tu consulta es el centro del universo.<br>
+      Haz clic en el chat y pregunta lo que necesites 🚀✨
+    </p>
+  </div>
+
+  <!-- Chatbot de Dialogflow -->
+  <script src="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/df-messenger.js"></script>
+  <df-messenger
+    project-id="proyecto-chatbots-463805"
+    agent-id="dcef942b-5cef-4cd4-aff5-d580bd636988"
+    language-code="es"
+    max-query-length="-1">
+    <df-messenger-chat-bubble chat-title="Soporte Tecnico"></df-messenger-chat-bubble>
+  </df-messenger>
+
+  <!-- Script para efecto de estrellas animadas -->
+  <script>
+    const canvas = document.querySelector('.stars');
+    const ctx = canvas.getContext('2d');
+    let stars = [];
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      stars = Array.from({length: 180}, () => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 1.4 + 0.3,
+        d: Math.random() * 2 + 0.3,
+        speed: Math.random() * 0.18 + 0.02
+      }));
+    }
+
+    function drawStars() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let star of stars) {
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.r, 0, Math.PI * 2, false);
+        ctx.fillStyle = "rgba(255,255,255," + (0.6 + 0.4*Math.random()) + ")";
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = "#fff";
+        ctx.fill();
+      }
+    }
+
+    function animateStars() {
+      for (let star of stars) {
+        star.y += star.speed;
+        if (star.y > canvas.height) {
+          star.y = 0;
+          star.x = Math.random() * canvas.width;
+        }
+      }
+      drawStars();
+      requestAnimationFrame(animateStars);
+    }
+
+    window.addEventListener('resize', resize);
+    resize();
+    animateStars();
+  </script>
+</body>
+</html>
