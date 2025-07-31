@@ -28,6 +28,9 @@
       overflow-x: hidden;
       transition: background 1s;
       animation: bgmove 20s linear infinite alternate;
+      /* Optimizaciones de rendimiento */
+      transform: translateZ(0);
+      backface-visibility: hidden;
     }
 
     @keyframes bgmove {
@@ -61,6 +64,9 @@
       filter: drop-shadow(0 0 20px rgba(94, 234, 212, 0.4));
       animation: logoFloat 6s ease-in-out infinite;
       transition: transform 0.3s ease;
+      /* Optimizaciones GPU */
+      will-change: transform;
+      transform: translateZ(0);
     }
 
     .logo-glow {
@@ -77,9 +83,12 @@
         transparent 70%);
       animation: glowPulse 4s ease-in-out infinite;
       z-index: -1;
+      /* Optimizaciones GPU */
+      will-change: transform, opacity;
+      transform: translateZ(0);
     }
 
-    /* Animaciones del Logo */
+    /* Animaciones del Logo optimizadas */
     @keyframes logoFadeIn {
       from { 
         opacity: 0; 
@@ -95,25 +104,19 @@
       0%, 100% { 
         transform: translateY(0) rotate(0deg); 
       }
-      25% { 
-        transform: translateY(-10px) rotate(2deg); 
-      }
       50% { 
-        transform: translateY(0) rotate(0deg); 
-      }
-      75% { 
-        transform: translateY(-5px) rotate(-1deg); 
+        transform: translateY(-8px) rotate(1deg); 
       }
     }
 
     @keyframes glowPulse {
       0%, 100% { 
         transform: translate(-50%, -50%) scale(1);
-        opacity: 0.6;
+        opacity: 0.5;
       }
       50% { 
-        transform: translate(-50%, -50%) scale(1.2);
-        opacity: 0.8;
+        transform: translate(-50%, -50%) scale(1.1);
+        opacity: 0.7;
       }
     }
 
@@ -149,12 +152,12 @@
       z-index: -1;
     }
 
-    /* Animaciones del Título */
+    /* Animaciones del Título optimizadas */
     @keyframes titleFadeIn {
       from { 
         opacity: 0; 
         transform: translateY(20px) scale(0.95); 
-        letter-spacing: 10px;
+        letter-spacing: 6px;
       }
       to { 
         opacity: 1; 
@@ -168,18 +171,18 @@
         transform: translateY(0); 
       }
       50% { 
-        transform: translateY(-8px); 
+        transform: translateY(-6px); 
       }
     }
 
     @keyframes titleGlow {
       0%, 100% { 
-        opacity: 0.3;
+        opacity: 0.2;
         transform: translate(-50%, -50%) scale(1);
       }
       50% { 
-        opacity: 0.6;
-        transform: translate(-50%, -50%) scale(1.1);
+        opacity: 0.4;
+        transform: translate(-50%, -50%) scale(1.05);
       }
     }
 
@@ -217,13 +220,16 @@
       }
     }
 
-    /* Efecto estrellas */
+    /* Efecto estrellas optimizado */
     .stars {
       position: fixed;
       top: 0; left: 0;
       width: 100vw; height: 100vh;
       pointer-events: none;
       z-index: 0;
+      /* Optimizaciones GPU */
+      will-change: auto;
+      transform: translateZ(0);
     }
 
     df-messenger {
@@ -309,8 +315,8 @@
       <div class="logo-glow"></div>
     </div>
     <h1>Soporte Técnico</h1>
-    <p>¡Bienvenido! Aquí puedes realizar tus consultas.<br>
-      Haz clic en el chat y pregunta lo que necesites 🚀✨
+    <p>¡Bienvenido! Aquí tu podras realizar tus consultas.<br>
+       Haz clic en el chat y pregunta lo que necesites 🚀✨
     </p>
   </div>
 
@@ -324,32 +330,50 @@
     <df-messenger-chat-bubble chat-title="Soporte Tecnico"></df-messenger-chat-bubble>
   </df-messenger>
 
-  <!-- Script para efecto de estrellas animadas -->
+  <!-- Script para efecto de estrellas animadas optimizado -->
   <script>
     const canvas = document.querySelector('.stars');
     const ctx = canvas.getContext('2d');
     let stars = [];
+    let animationId;
+
+    // Detectar dispositivos móviles y ajustar rendimiento
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const isLowPerformance = window.innerWidth < 768 || isMobile;
 
     function resize() {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
-      stars = Array.from({length: 180}, () => ({
+      
+      // Reducir cantidad de estrellas según el dispositivo para mejor rendimiento
+      const starCount = isLowPerformance ? 40 : 80; // Reducido de 180 a 40/80
+      
+      stars = Array.from({length: starCount}, () => ({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
-        r: Math.random() * 1.4 + 0.3,
+        r: Math.random() * (isLowPerformance ? 1.0 : 1.2) + 0.3, // Estrellas más pequeñas
         d: Math.random() * 2 + 0.3,
-        speed: Math.random() * 0.18 + 0.02
+        speed: Math.random() * (isLowPerformance ? 0.1 : 0.15) + 0.02, // Velocidad reducida
+        opacity: 0.6 + 0.4 * Math.random() // Opacidad fija por estrella
       }));
     }
 
     function drawStars() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
       for (let star of stars) {
         ctx.beginPath();
         ctx.arc(star.x, star.y, star.r, 0, Math.PI * 2, false);
-        ctx.fillStyle = "rgba(255,255,255," + (0.6 + 0.4*Math.random()) + ")";
-        ctx.shadowBlur = 12;
-        ctx.shadowColor = "#fff";
+        ctx.fillStyle = `rgba(255,255,255,${star.opacity})`;
+        
+        // Solo aplicar sombra en dispositivos de alto rendimiento y a estrellas grandes
+        if (!isLowPerformance && star.r > 1.0) {
+          ctx.shadowBlur = 8; // Reducido de 12 a 8
+          ctx.shadowColor = "#fff";
+        } else {
+          ctx.shadowBlur = 0; // Sin sombra en móviles
+        }
+        
         ctx.fill();
       }
     }
@@ -363,12 +387,31 @@
         }
       }
       drawStars();
-      requestAnimationFrame(animateStars);
+      animationId = requestAnimationFrame(animateStars);
     }
 
-    window.addEventListener('resize', resize);
+    // Pausar animación cuando la pestaña no está activa (mejora rendimiento)
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        if (animationId) {
+          cancelAnimationFrame(animationId);
+        }
+      } else {
+        animateStars();
+      }
+    });
+
+    // Optimizar redimensionamiento con debounce
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(resize, 250);
+    });
+
+    // Inicializar
     resize();
     animateStars();
   </script>
 </body>
 </html>
+
